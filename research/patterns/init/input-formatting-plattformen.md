@@ -55,22 +55,22 @@ flowchart TD
 
 ## Plattformübergreifende Grundbegriffe
 
-| Begriff | Bedeutung | Beispiel Währungsbetrag |
-|---|---|---|
-| **Eingabetext** | Was gerade im Feld steht, inkl. Tippfehlern | `1234,5` |
-| **Anzeigewert** | Formatierte Darstellung nach Blur | `1.234,50 €` |
-| **Wert (`value`)** | Normalisierter, locale-unabhängiger Datenwert | `1234.50` (Dezimal-String) oder `123450` (Cent) |
-| **Locale** | Sprache + Region, bestimmt Trennzeichen und Symbolposition | `de-DE`, `de-CH`, `en-US` |
+| Begriff            | Bedeutung                                                  | Beispiel Währungsbetrag                         |
+| ------------------ | ---------------------------------------------------------- | ----------------------------------------------- |
+| **Eingabetext**    | Was gerade im Feld steht, inkl. Tippfehlern                | `1234,5`                                        |
+| **Anzeigewert**    | Formatierte Darstellung nach Blur                          | `1.234,50 €`                                    |
+| **Wert (`value`)** | Normalisierter, locale-unabhängiger Datenwert              | `1234.50` (Dezimal-String) oder `123450` (Cent) |
+| **Locale**         | Sprache + Region, bestimmt Trennzeichen und Symbolposition | `de-DE`, `de-CH`, `en-US`                       |
 
 ### Parsing, Formatierung und Validierung
 
 Drei getrennte Schritte mit jeweils eigener Aufgabe. Werden sie vermischt, entstehen typische Fehler: Formatter, die Eingaben ablehnen, oder Prüfregeln, die auf dem Anzeigetext statt auf dem Wert arbeiten.
 
-| Schritt | Richtung | Leitfrage | Bei Erfolg | Bei Misserfolg | Beispiel Währungsbetrag |
-|---|---|---|---|---|---|
-| **Parsing** | Eingabetext → Wert | Lässt sich der Text als Wert dieses Typs lesen? | Normalisierter `value` | Parse-Fehler, Text bleibt stehen | `1.234,5 €` → `1234.50` |
-| **Formatierung** | Wert → Anzeigewert | Wie wird der Wert in dieser Locale dargestellt? | Kanonischer Anzeigewert | Kann nicht scheitern, da nur geparste Werte formatiert werden | `1234.50` → `1.234,50 €` |
-| **Validierung** | Wert → gültig / ungültig | Erfüllt der Wert die fachlichen Regeln? | Keine Meldung | Validierungsfehler, Wert und Anzeige bleiben erhalten | `1234.50` > Maximum `1000` → „Höchstens 1.000,00 €“ |
+| Schritt          | Richtung                 | Leitfrage                                       | Bei Erfolg              | Bei Misserfolg                                                | Beispiel Währungsbetrag                             |
+| ---------------- | ------------------------ | ----------------------------------------------- | ----------------------- | ------------------------------------------------------------- | --------------------------------------------------- |
+| **Parsing**      | Eingabetext → Wert       | Lässt sich der Text als Wert dieses Typs lesen? | Normalisierter `value`  | Parse-Fehler, Text bleibt stehen                              | `1.234,5 €` → `1234.50`                             |
+| **Formatierung** | Wert → Anzeigewert       | Wie wird der Wert in dieser Locale dargestellt? | Kanonischer Anzeigewert | Kann nicht scheitern, da nur geparste Werte formatiert werden | `1234.50` → `1.234,50 €`                            |
+| **Validierung**  | Wert → gültig / ungültig | Erfüllt der Wert die fachlichen Regeln?         | Keine Meldung           | Validierungsfehler, Wert und Anzeige bleiben erhalten         | `1234.50` > Maximum `1000` → „Höchstens 1.000,00 €“ |
 
 - **Reihenfolge**: Parsen → Formatieren → Validieren. Auch ein parsebarer, aber ungültiger Wert wird formatiert, damit Feld und Fehlermeldung dieselbe lesbare Darstellung zeigen.
 - Der Parser akzeptiert jede plausible Schreibweise, der Formatter erzeugt **genau eine** kanonische Darstellung pro Locale. Jede formatierte Ausgabe ist wieder parsebar.
@@ -80,10 +80,10 @@ Drei getrennte Schritte mit jeweils eigener Aufgabe. Werden sie vermischt, entst
 
 **Zwei Fehlerarten mit unterschiedlichen Meldungen**
 
-| Fehlerart | Ursache | Beispielmeldung |
-|---|---|---|
-| Parse-Fehler | Text ergibt keinen Wert des Typs | „Betrag enthält ungültige Zeichen. Erlaubt sind Ziffern, Komma und Punkt.“ |
-| Validierungsfehler | Wert verletzt eine fachliche Regel (Bereich, Länge, Prüfziffer, Pflicht) | „Betrag darf höchstens 1.000,00 € betragen.“ |
+| Fehlerart          | Ursache                                                                  | Beispielmeldung                                                            |
+| ------------------ | ------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| Parse-Fehler       | Text ergibt keinen Wert des Typs                                         | „Betrag enthält ungültige Zeichen. Erlaubt sind Ziffern, Komma und Punkt.“ |
+| Validierungsfehler | Wert verletzt eine fachliche Regel (Bereich, Länge, Prüfziffer, Pflicht) | „Betrag darf höchstens 1.000,00 € betragen.“                               |
 
 **Beispiel IBAN**
 
@@ -97,13 +97,13 @@ Drei getrennte Schritte mit jeweils eigener Aufgabe. Werden sie vermischt, entst
 
 ### Wann wird formatiert?
 
-| Event | Verhalten |
-|---|---|
+| Event                | Verhalten                                                                                                                                                                                                                             |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `input` / `onChange` | Kein Umformatieren. Nur Zeichen filtern, die nie gültig sein können, und dann mit sichtbarem Hinweis statt stillem Verwerfen. Ausnahme: reine Gruppierung durch Leerzeichen (IBAN), wenn die Cursor-Position korrekt nachgeführt wird |
-| `focus` | Anzeigewert **nicht** verändern. Ein Wechsel des Feldinhalts beim Fokussieren irritiert Screenreader- und Lupen-Nutzende. Der Parser akzeptiert formatierte Werte ohnehin |
-| `paste` | Nicht blockieren. Inhalt übernehmen, normalisieren erst bei Blur oder sofort, wenn nur Trennzeichen entfernt werden |
-| `blur` / `change` | Parsen → bei Erfolg kanonisch formatieren und `value` setzen → validieren |
-| Submit | Erneut parsen und validieren (Autofill und Skripte lösen nicht immer `blur` aus) |
+| `focus`              | Anzeigewert **nicht** verändern. Ein Wechsel des Feldinhalts beim Fokussieren irritiert Screenreader- und Lupen-Nutzende. Der Parser akzeptiert formatierte Werte ohnehin                                                             |
+| `paste`              | Nicht blockieren. Inhalt übernehmen, normalisieren erst bei Blur oder sofort, wenn nur Trennzeichen entfernt werden                                                                                                                   |
+| `blur` / `change`    | Parsen → bei Erfolg kanonisch formatieren und `value` setzen → validieren                                                                                                                                                             |
+| Submit               | Erneut parsen und validieren (Autofill und Skripte lösen nicht immer `blur` aus)                                                                                                                                                      |
 
 Validierungsrhythmus: erste Fehlermeldung bei Blur, danach live bei jeder Eingabe, bis der Fehler behoben ist.
 
@@ -117,13 +117,13 @@ Validierungsrhythmus: erste Fehlermeldung bei Blur, danach live bei jeder Eingab
 
 ### Welche Input-Typen werden formatiert?
 
-| HTML-Typ | Formatieren? | Begründung |
-|---|---|---|
-| `type="text"` (+ `inputmode`) | **Ja** – Standard für alle formatierten Felder | Volle Kontrolle über Anzeige, Parsing, Cursor |
-| `type="tel"` | **Ja, zurückhaltend** | Keine Browser-Validierung, liefert Telefontastatur; Inhalt ist frei |
-| `type="number"` | **Nein** | Anzeige und Dezimaltrenner steuert der Browser abhängig von Browser- bzw. Systemlocale, nicht von der App. `value` ist bei ungültiger Eingabe leer (`""`), Tausendertrenner sind unmöglich, Scrollrad und Pfeiltasten verändern Werte, führende Nullen gehen verloren ([GOV.UK](https://technology.blog.gov.uk/2020/02/24/why-the-gov-uk-design-system-team-changed-the-input-type-for-numbers/)) |
-| `type="date"`, `type="time"` | **Nein** | Browser formatiert nach Systemlocale, `value` ist ISO |
-| `type="email"`, `type="url"` | **Nein** | Kein Formatierungsbedarf |
+| HTML-Typ                      | Formatieren?                                   | Begründung                                                                                                                                                                                                                                                                                                                                                                                        |
+| ----------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type="text"` (+ `inputmode`) | **Ja** – Standard für alle formatierten Felder | Volle Kontrolle über Anzeige, Parsing, Cursor                                                                                                                                                                                                                                                                                                                                                     |
+| `type="tel"`                  | **Ja, zurückhaltend**                          | Keine Browser-Validierung, liefert Telefontastatur; Inhalt ist frei                                                                                                                                                                                                                                                                                                                               |
+| `type="number"`               | **Nein**                                       | Anzeige und Dezimaltrenner steuert der Browser abhängig von Browser- bzw. Systemlocale, nicht von der App. `value` ist bei ungültiger Eingabe leer (`""`), Tausendertrenner sind unmöglich, Scrollrad und Pfeiltasten verändern Werte, führende Nullen gehen verloren ([GOV.UK](https://technology.blog.gov.uk/2020/02/24/why-the-gov-uk-design-system-team-changed-the-input-type-for-numbers/)) |
+| `type="date"`, `type="time"`  | **Nein**                                       | Browser formatiert nach Systemlocale, `value` ist ISO                                                                                                                                                                                                                                                                                                                                             |
+| `type="email"`, `type="url"`  | **Nein**                                       | Kein Formatierungsbedarf                                                                                                                                                                                                                                                                                                                                                                          |
 
 Konsequenz: Ein „numerisches“ Feld mit Formatierung ist immer `type="text"` mit `inputmode="decimal"` oder `inputmode="numeric"`. `inputmode` ist nur ein Hinweis an die Tastatur und schränkt die Eingabe nicht ein – Hardware-Tastaturen und Paste liefern beliebige Zeichen.
 
@@ -138,7 +138,7 @@ Konsequenz: Ein „numerisches“ Feld mit Formatierung ist immer `type="text"` 
 
 ### Wann wird formatiert?
 
-- **SwiftUI** `TextField(value:format:)` mit `FormatStyle`: Der gebundene Wert wird nur aktualisiert, wenn der Text parsebar ist. Die Neuformatierung des Texts erfolgt beim Absenden (Return) oder bei Fokusverlust – entspricht dem Blur-Prinzip ([Apple](https://developer.apple.com/documentation/swiftui/textfield/init(_:value:format:prompt:)), [fatbobman](https://fatbobman.com/en/posts/textfield-1/)).
+- **SwiftUI** `TextField(value:format:)` mit `FormatStyle`: Der gebundene Wert wird nur aktualisiert, wenn der Text parsebar ist. Die Neuformatierung des Texts erfolgt beim Absenden (Return) oder bei Fokusverlust – entspricht dem Blur-Prinzip ([Apple](<https://developer.apple.com/documentation/swiftui/textfield/init(_:value:format:prompt:)>), [fatbobman](https://fatbobman.com/en/posts/textfield-1/)).
 - Bekannte Falle: Bei `.currency(code:)` steht das Symbol im editierbaren Text (`US$0.00`); Eingaben, die der Formatter nicht parsen kann, werden ignoriert ([Apple Developer Forums](https://developer.apple.com/forums/thread/757272)). Empfehlung: Währungssymbol außerhalb des Felds platzieren, im Feld nur `.number.precision(.fractionLength(2))`.
 - **Live-Formatierung** (z. B. IBAN-Gruppen) über `UITextFieldDelegate.textField(_:shouldChangeCharactersIn:replacementString:)` mit eigener Cursor-Berechnung; in SwiftUI nur mit Workarounds (`onChange` mit Text-Neusetzung, Cursor springt ans Ende).
 - `onSubmit` und `@FocusState` als Hook für „Blur“.
@@ -151,25 +151,25 @@ Konsequenz: Ein „numerisches“ Feld mit Formatierung ist immer `type="text"` 
 
 ### Tastaturen (`keyboardType`)
 
-| `keyboardType` | Inhalt | Einsatz | Hinweis |
-|---|---|---|---|
-| `.numberPad` | 0–9 | PLZ (DE/AT/CH), Ziffern-Kennungen | Kein Dezimaltrenner, kein Minus, **keine Return-Taste** → Toolbar mit „Fertig“ ergänzen |
-| `.decimalPad` | 0–9 + Dezimaltrenner | Beträge, Prozent, Dezimalstunden | Trennzeichen folgt Region bzw. aktiver Tastatur, nicht der App-Locale; kein Minus |
-| `.phonePad` | 0–9, `+`, `*`, `#` | Telefonnummern | Keine Return-Taste |
-| `.numbersAndPunctuation` | Ziffern + Satzzeichen inkl. `-`, `:` | Negative Beträge, Stunden `7:30` | Volle Tastatur auf Ziffernebene |
-| `.asciiCapableNumberPad` | nur ASCII-Ziffern | Kennungen, wenn keine arabisch-indischen Ziffern entstehen sollen | ab iOS 10 |
-| `.asciiCapable` / `.default` | Volltastatur | IBAN, alphanumerische PLZ | mit `.textInputAutocapitalization(.characters)` |
+| `keyboardType`               | Inhalt                               | Einsatz                                                           | Hinweis                                                                                 |
+| ---------------------------- | ------------------------------------ | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `.numberPad`                 | 0–9                                  | PLZ (DE/AT/CH), Ziffern-Kennungen                                 | Kein Dezimaltrenner, kein Minus, **keine Return-Taste** → Toolbar mit „Fertig“ ergänzen |
+| `.decimalPad`                | 0–9 + Dezimaltrenner                 | Beträge, Prozent, Dezimalstunden                                  | Trennzeichen folgt Region bzw. aktiver Tastatur, nicht der App-Locale; kein Minus       |
+| `.phonePad`                  | 0–9, `+`, `*`, `#`                   | Telefonnummern                                                    | Keine Return-Taste                                                                      |
+| `.numbersAndPunctuation`     | Ziffern + Satzzeichen inkl. `-`, `:` | Negative Beträge, Stunden `7:30`                                  | Volle Tastatur auf Ziffernebene                                                         |
+| `.asciiCapableNumberPad`     | nur ASCII-Ziffern                    | Kennungen, wenn keine arabisch-indischen Ziffern entstehen sollen | ab iOS 10                                                                               |
+| `.asciiCapable` / `.default` | Volltastatur                         | IBAN, alphanumerische PLZ                                         | mit `.textInputAutocapitalization(.characters)`                                         |
 
 Ergänzend `textContentType` für AutoFill: `.telephoneNumber`, `.postalCode`, `.creditCardNumber` (es gibt keinen Content-Type für IBAN). `textContentType` bestimmt **nicht** die Tastatur – `keyboardType` immer explizit setzen.
 
 ### Web-Inhalte auf iOS (Safari, WKWebView)
 
-| `inputmode` | Tastatur auf iOS |
-|---|---|
-| `numeric` | Ziffernblock 0–9, ohne Trenner und Minus |
-| `decimal` | Ziffernblock + Dezimaltrenner gemäß iOS-Region bzw. Tastatur, **nicht** gemäß `<html lang>` |
-| `tel` | Telefon-Ziffernblock mit `+ * #` |
-| `text` | Volltastatur (einzige Variante mit Minus) |
+| `inputmode` | Tastatur auf iOS                                                                            |
+| ----------- | ------------------------------------------------------------------------------------------- |
+| `numeric`   | Ziffernblock 0–9, ohne Trenner und Minus                                                    |
+| `decimal`   | Ziffernblock + Dezimaltrenner gemäß iOS-Region bzw. Tastatur, **nicht** gemäß `<html lang>` |
+| `tel`       | Telefon-Ziffernblock mit `+ * #`                                                            |
+| `text`      | Volltastatur (einzige Variante mit Minus)                                                   |
 
 Bekannte Abweichungen: Region mit Komma, aber Tastatur mit Punkt ([WebKit Bug 247242](https://bugs.webkit.org/show_bug.cgi?id=247242)); Regressionsberichte zu iOS 26.2 mit deutscher Sprache ([Apple Developer Forums](https://developer.apple.com/forums/thread/818268)). Folgerung: Parser akzeptiert immer `,` **und** `.` als Dezimaltrenner, wenn nur ein Trennzeichen vorkommt.
 
@@ -192,13 +192,13 @@ Bekannte Abweichungen: Region mit Komma, aber Tastatur mit Punkt ([WebKit Bug 24
 
 ### Tastaturen
 
-| Compose `KeyboardType` | View `inputType` | Einsatz | Hinweis |
-|---|---|---|---|
-| `Number` | `number` | PLZ, Ziffern-Kennungen | Gboard zeigt Ziffernblock mit Zusatzzeichen |
-| `Decimal` | `numberDecimal` | Beträge, Prozent, Dezimalstunden | Dezimaltrenner je nach Tastatur-App und Version; Samsung- und Gboard-Tastaturen fügen bei `de-DE` teils `.` statt `,` ein ([Kotlin Slack](https://slack-chats.kotlinlang.org/t/2688201/hey-guys-i-need-help-i-released-my-new-app-one-week-ago-a-fe)) |
-| – | `numberSigned` / `numberSigned\|numberDecimal` | negative Beträge | |
-| `Phone` | `phone` | Telefonnummern | enthält `+ * # ( ) -` |
-| `Text` + `KeyboardCapitalization.Characters`, `autoCorrectEnabled = false` | `textCapCharacters\|textNoSuggestions` | IBAN, alphanumerische PLZ | |
+| Compose `KeyboardType`                                                     | View `inputType`                               | Einsatz                          | Hinweis                                                                                                                                                                                                                                               |
+| -------------------------------------------------------------------------- | ---------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Number`                                                                   | `number`                                       | PLZ, Ziffern-Kennungen           | Gboard zeigt Ziffernblock mit Zusatzzeichen                                                                                                                                                                                                           |
+| `Decimal`                                                                  | `numberDecimal`                                | Beträge, Prozent, Dezimalstunden | Dezimaltrenner je nach Tastatur-App und Version; Samsung- und Gboard-Tastaturen fügen bei `de-DE` teils `.` statt `,` ein ([Kotlin Slack](https://slack-chats.kotlinlang.org/t/2688201/hey-guys-i-need-help-i-released-my-new-app-one-week-ago-a-fe)) |
+| –                                                                          | `numberSigned` / `numberSigned\|numberDecimal` | negative Beträge                 |                                                                                                                                                                                                                                                       |
+| `Phone`                                                                    | `phone`                                        | Telefonnummern                   | enthält `+ * # ( ) -`                                                                                                                                                                                                                                 |
+| `Text` + `KeyboardCapitalization.Characters`, `autoCorrectEnabled = false` | `textCapCharacters\|textNoSuggestions`         | IBAN, alphanumerische PLZ        |                                                                                                                                                                                                                                                       |
 
 - `KeyboardOptions` sind nur Hinweise; Tastatur-Apps von Drittanbietern können sie ignorieren ([Android Developers](https://developer.android.com/reference/kotlin/androidx/compose/foundation/text/KeyboardOptions)).
 - In Views ab API 26 `DigitsKeyListener.getInstance(locale, signed, decimal)` für locale-korrekte Dezimaltrenner; bekannte Lücken bei Fullscreen-Eingabe und arabischen Trennzeichen ([Android Developers](https://developer.android.com/reference/android/text/method/DigitsKeyListener), [Titanium JIRA](https://jira-archive.titaniumsdk.com/TIMOB-27616)).
@@ -213,14 +213,14 @@ Bekannte Abweichungen: Region mit Komma, aber Tastatur mit Punkt ([WebKit Bug 24
 
 ## Plattformvergleich auf einen Blick
 
-| Aspekt | Web | iOS | Android |
-|---|---|---|---|
-| Zeitpunkt Formatierung | `blur` | Submit / Fokusverlust (`FormatStyle`) | `onFocusChanged`; Gruppierung live via `OutputTransformation` |
-| Trennung Wert / Anzeige | eigener State oder Hidden Input | Binding (`Decimal`) vs. Feldtext | `TextFieldState` vs. `OutputTransformation` |
-| Formatter | `Intl.NumberFormat` | `FormatStyle`, `NumberFormatter` | ICU `NumberFormat`, `MeasureFormat` |
-| Feldtyp für Formatierung | `type="text"` + `inputmode` | `TextField` + `keyboardType` | `TextField` + `KeyboardType` |
-| Nicht formatieren | `type="number"`, `date`, `time` | – (kein natives Number-Feld) | – |
-| Dezimaltrenner-Quelle | Tastatur des OS, nicht `lang` | Region / aktive Tastatur | Tastatur-App + Systemsprache |
+| Aspekt                   | Web                             | iOS                                   | Android                                                       |
+| ------------------------ | ------------------------------- | ------------------------------------- | ------------------------------------------------------------- |
+| Zeitpunkt Formatierung   | `blur`                          | Submit / Fokusverlust (`FormatStyle`) | `onFocusChanged`; Gruppierung live via `OutputTransformation` |
+| Trennung Wert / Anzeige  | eigener State oder Hidden Input | Binding (`Decimal`) vs. Feldtext      | `TextFieldState` vs. `OutputTransformation`                   |
+| Formatter                | `Intl.NumberFormat`             | `FormatStyle`, `NumberFormatter`      | ICU `NumberFormat`, `MeasureFormat`                           |
+| Feldtyp für Formatierung | `type="text"` + `inputmode`     | `TextField` + `keyboardType`          | `TextField` + `KeyboardType`                                  |
+| Nicht formatieren        | `type="number"`, `date`, `time` | – (kein natives Number-Feld)          | –                                                             |
+| Dezimaltrenner-Quelle    | Tastatur des OS, nicht `lang`   | Region / aktive Tastatur              | Tastatur-App + Systemsprache                                  |
 
 ---
 
@@ -228,16 +228,16 @@ Bekannte Abweichungen: Region mit Komma, aber Tastatur mit Punkt ([WebKit Bug 24
 
 Jeder Eingabetyp gliedert sich in:
 
-- **Plattformübergreifend**: Darstellung, Formatierungsregeln mit Beispielen, Normalisierung bei Copy/Paste, Verhalten bei Sprachwechsel
+- **Plattformübergreifend**: Grundlagen (ohne eigene Überschrift), Formatierungsregeln mit Beispielen, Verhalten bei Copy/Paste, Verhalten bei Sprachwechsel
 - **Web**, **iOS**, **Android**: Feldkonfiguration und Tastatur, Zeitpunkt und API der Formatierung, Wert und Anzeige, Copy/Paste, Locale-Quelle, Barrierefreiheit
 
 Locale-Quelle je Plattform (gilt für alle Eingabetypen):
 
-| Plattform | Locale für Formatierung | Besonderheit |
-|---|---|---|
-| Web | App-Einstellung bzw. `<html lang>`, ersatzweise `navigator.languages` | Tastatur-Dezimaltrenner folgt dem Betriebssystem, nicht `lang` |
-| iOS | `Locale.current` bzw. SwiftUI-Environment `\.locale` | App-Sprache pro App wählbar; Zahlenformat seit iOS 16 in den Einstellungen separat änderbar („Zahlenformat“) – `Locale.current` kann daher von der Sprache abweichende Trennzeichen liefern |
-| Android | `LocalConfiguration.current.locales` / `Locale.getDefault()` | App-Sprache pro App ab Android 13 (`AppCompatDelegate.setApplicationLocales`); regionale Präferenzen (z. B. Ziffernsystem) ab Android 14 |
+| Plattform | Locale für Formatierung                                               | Besonderheit                                                                                                                                                                                |
+| --------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Web       | App-Einstellung bzw. `<html lang>`, ersatzweise `navigator.languages` | Tastatur-Dezimaltrenner folgt dem Betriebssystem, nicht `lang`                                                                                                                              |
+| iOS       | `Locale.current` bzw. SwiftUI-Environment `\.locale`                  | App-Sprache pro App wählbar; Zahlenformat seit iOS 16 in den Einstellungen separat änderbar („Zahlenformat“) – `Locale.current` kann daher von der Sprache abweichende Trennzeichen liefern |
+| Android   | `LocalConfiguration.current.locales` / `Locale.getDefault()`          | App-Sprache pro App ab Android 13 (`AppCompatDelegate.setApplicationLocales`); regionale Präferenzen (z. B. Ziffernsystem) ab Android 14                                                    |
 
 ---
 
@@ -245,62 +245,34 @@ Locale-Quelle je Plattform (gilt für alle Eingabetypen):
 
 #### Plattformübergreifend
 
-**Darstellung**
-
-| Locale | Anzeige | Regel |
-|---|---|---|
-| `de-DE` | `1.234,50 €` | Punkt als Tausendertrenner, Komma dezimal, Symbol nach geschütztem Leerzeichen |
-| `de-AT` | `€ 1.234,50` | Symbol vorangestellt |
-| `de-CH` | `CHF 1’234.50` | Apostroph als Tausendertrenner (je nach CLDR-Version `'` oder `’`), Punkt dezimal |
-| `en-US` | `$1,234.50` | Symbol ohne Leerzeichen vorangestellt |
-| `fr-FR` | `1 234,50 €` | schmales geschütztes Leerzeichen als Tausendertrenner |
-
-- `value` als Dezimal-String oder Integer in kleinster Einheit (Cent), nie als Gleitkommazahl.
-
 **Formatierungsregeln**
 
-| Regel | Beschreibung | Beispiel (`de-DE`, EUR) |
-|---|---|---|
-| **Zeitpunkt** | Formatierung erst bei Fokusverlust, nicht während der Eingabe | – |
-| **Tausendertrenner** | Ziffern vor dem Dezimaltrenner in Dreiergruppen mit dem Gruppierungszeichen der Locale | `1234` → `1.234,00` |
-| **Dezimaltrenner** | Dezimaltrenner der Locale, unabhängig vom eingegebenen Zeichen | `1234.56` → `1.234,56` |
-| **Nachkommastellen** | Anzahl folgt der **Währung**, nicht der Locale: EUR 2, JPY 0, KWD 3 (CLDR). Fehlende Stellen werden aufgefüllt | `1234,5` → `1.234,50` |
-| **Keine Rundung** | Mehr Nachkommastellen als die Währung erlaubt → Fehlermeldung statt stiller Rundung | `12,345` → Fehler |
-| **Währungssymbol** | Als Prefix/Suffix **außerhalb des editierbaren Texts**, Position nach Locale. Bei mehreren Währungen im Produkt ISO-Code statt Symbol – Polaris unterscheidet dafür ein „short“ und ein „explicit“ Format ([Polaris](https://polaris.shopify.com/foundations/formatting-localized-currency)) | `1.234,50 €` bzw. `1.234,50 EUR` |
-| **Leeres Feld** | Bleibt leer, kein automatisches `0,00` | leer → leer |
+| Regel                                                         | Beschreibung                                                                                                                                          | Eingabe                             | Anzeigewert                                                             | Datenwert                |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------- | ------------------------ |
+| Formatierung nach Fokusverlust                                | Während der Eingabe bleibt der Text unverändert; formatiert wird erst bei Fokusverlust                                                                | `1234,5`                            | Im Fokus: `1234,5`<br/>nach Fokusverlust de: `1.234,50`, en: `1,234.50` | `1234.50`                |
+| Ganzzahl vollständig formatieren                              | Ohne Trennzeichen = ganze Euro; Tausendertrenner und Nachkommastellen nach Locale ergänzt                                                             | `1234`                              | de: `1.234,00`<br/>en: `1,234.00`                                       | `1234.00`                |
+| Fehlende Nachkommastellen auffüllen                           | EUR hat immer 2 Nachkommastellen; fehlende Null ergänzt                                                                                               | `1234,5`                            | de: `1.234,50`<br/>en: `1,234.50`                                       | `1234.50`                |
+| Kanonisches Format bleibt unverändert                         | Schon im Zielformat der Locale; nur der Datenwert verliert die Trennzeichen                                                                           | de: `1.234,56`<br/>en: `1,234.56`   | de: `1.234,56`<br/>en: `1,234.56`                                       | `1234.56`                |
+| Einzelnes Trennzeichen mit 1-2 Folgeziffern ist dezimal       | Kommt nur ein Trennzeichen vor und folgen 1–2 Ziffern → Dezimaltrenner, unabhängig von der Locale (deckt Tastaturabweichungen auf iOS und Android ab) | `1234.56`                           | de: `1.234,56`<br/>en: `1,234.56`                                       | `1234.56`                |
+| Einzelnes Trennzeichen mit drei Folgeziffern folgt der Locale | 3 Ziffern nach `.`: de liest Tausender, en liest 3 Nachkommastellen → Fehler                                                                          | `1.234`                             | de: `1.234,00`<br/>en: Fehlermeldung                                    | de: `1234.00`<br/>en: –  |
+| Letztes Trennzeichen ist dezimal                              | Kommen `,` und `.` beide vor so ist das letzte Zeichen ist der Dezimaltrenner                                                                         | `1,234.56`                          | de: `1.234,56`<br/>en: `1,234.56`                                       | `1234.56`                |
+| Währungssymbol aus dem Feld entfernen                         | Symbol vor dem Parsen entfernt, Anzeige außerhalb des Felds (de nach, en vor dem Betrag)                                                              | `€ 12`                              | de: `12,00`<br/>en: `12.00`                                             | `12.00`                  |
+| Überzählige Nachkommastellen ablehnen                         | 3 Ziffern nach `,`: de liest 3 Nachkommastellen → Fehler statt Rundung, en liest Tausender                                                            | `12,345`                            | de: Fehlermeldung<br/>en: `12,345.00`                                   | de: –<br/>en: `12345.00` |
+| Keine Rundung                                                 | Mehr als 2 Nachkommastellen → Fehler statt stiller Rundung auf `,57`, die den Betrag unbemerkt ändert                                                 | de: `1.234,567`<br/>en: `1,234.567` | de/en: Fehlermeldung                                                    | –                        |
+| Leeres Feld                                                   | Leer bleibt leer; kein automatisches `0,00`, sonst wirkt das Feld ausgefüllt                                                                          | leer                                | de/en: leer                                                             | leer (`null`)            |
 
-Beispiele (Locale `de-DE`, EUR):
-
-| Eingabe | Anzeige nach Fokusverlust | `value` |
-|---|---|---|
-| `1234` | `1.234,00` | `1234.00` |
-| `1234,5` | `1.234,50` | `1234.50` |
-| `1.234,56` | `1.234,56` | `1234.56` |
-| `1234.56` | `1.234,56` | `1234.56` (nur ein Trenner, 2 Nachkommastellen → dezimal) |
-| `1.234` | `1.234,00` | `1234.00` (Gruppierung in `de-DE`) |
-| `1,234.56` | `1.234,56` | `1234.56` (beide Trenner, der letzte ist dezimal) |
-| `€ 12` | `12,00` | `12.00` |
-| `12,345` | Fehlermeldung | – (mehr Nachkommastellen als die Währung erlaubt) |
-
-Parsing-Regeln für mehrdeutige Eingaben:
-
-| Regel | Beschreibung | Beispiel (`de-DE`) |
-|---|---|---|
-| **Letzter Trenner** | Kommen `,` und `.` beide vor → das **letzte** Zeichen ist der Dezimaltrenner | `1,234.56` → `1234.56` |
-| **Drei Ziffern** | Kommt nur ein Trennzeichen vor und folgen genau **drei** Ziffern → Interpretation nach UI-Locale (`de`: Tausender, `en`: dezimal) | `1.234` → `1234.00` |
-| **Ein bis zwei Ziffern** | Kommt nur ein Trennzeichen vor und folgen 1–2 Ziffern → Dezimaltrenner, unabhängig von der Locale (deckt Tastaturabweichungen auf iOS und Android ab) | `1234.5` → `1234.50` |
-
-**Copy/Paste (Normalisierung)**
+**Verhalten bei Copy/Paste (Normalisierung)**
 
 - `1.234,56 €`, `EUR 1234,56`, `$1,234.56`, `1 234,56` werden akzeptiert: Währungssymbole, ISO-Codes und Leerzeichen (inkl. geschützter) entfernen, dann nach obigen Regeln parsen.
 - Fremde Währung im eingefügten Text (`$` in einem EUR-Feld) nicht stillschweigend übernehmen, sondern Hinweis anzeigen.
 - Ziffern anderer Ziffernsysteme (z. B. arabisch-indisch) in lateinische Ziffern umwandeln.
 
-**Sprachwechsel**
+**Verhalten bei Sprachwechsel**
 
-- Die **Währung ist Teil der Daten**, nicht der Sprache: Ein Betrag in EUR bleibt EUR, wenn die UI auf Englisch wechselt.
-- Nur die Darstellung wechselt: `1.234,50 €` (`de-DE`) → `€1,234.50` (`en-US`) bzw. `1.234,50 €` in `en-DE`, wenn Sprache und Region getrennt gewählt werden.
-- Ein fokussiertes Feld wird beim Sprachwechsel nicht umformatiert, erst beim nächsten Fokusverlust.
+- **Daten bleiben, Anzeige wechselt**: Währung und Datenwert (EUR, `1234.50`) ändern sich nicht. Nur die Darstellung folgt der neuen Locale: `1.234,50 €` (`de-DE`) → `€1,234.50` (`en-US`).
+- **Region bestimmt die Darstellung, nicht die Sprache**: Trennzeichen und Symbolposition kommen aus der Region. Bei getrennter Sprache und Region (`en-DE`) kann das überraschen: Beträge erscheinen englisch (`€1,234.50`), Zahlen ohne Währung deutsch (`1.234,5`) (ICU 78.2).
+- **Kein Umformatieren im Fokus**: Ein fokussiertes Feld behält seinen Text und wird erst beim nächsten Fokusverlust in der neuen Locale formatiert.
+- **Parser und Formatter aus einer Quelle**: Der Parser liest die Trennzeichen aus dem Währungsformatter des Felds, damit die angezeigte Schreibweise immer wieder eingelesen werden kann.
 
 #### Web
 
@@ -315,7 +287,12 @@ Parsing-Regeln für mehrdeutige Eingaben:
 ```html
 <label for="amount">Betrag in Euro</label>
 <div class="input-group">
-  <input id="amount" type="text" inputmode="decimal" aria-describedby="amount-hint">
+  <input
+    id="amount"
+    type="text"
+    inputmode="decimal"
+    aria-describedby="amount-hint"
+  />
   <span aria-hidden="true">€</span>
 </div>
 <p id="amount-hint">Zum Beispiel 1.234,50</p>
@@ -347,44 +324,33 @@ Parsing-Regeln für mehrdeutige Eingaben:
 
 #### Plattformübergreifend
 
-**Darstellung**
-
-- Papierformat (ISO 13616): Vierergruppen mit Leerzeichen, letzte Gruppe variabel: `DE89 3704 0044 0532 0130 00`.
-- Elektronisches Format (`value`): ohne Leerzeichen, Großbuchstaben: `DE89370400440532013000` ([CNB](https://www.cnb.cz/en/payments/iban/iban-international-bank-account-number-basic-information/)).
 - Länge je Land: DE 22, AT 20, CH 21, FR 27, NL 18; maximal 34 Zeichen.
-- Mehr Zeichenabstand verbessert die Lesbarkeit langer Kennungen ([GOV.UK Bank details](https://design-system.service.gov.uk/patterns/bank-details/)).
-- Feldbreite passend zur erwarteten Länge.
+- Mehr Zeichenabstand verbessert die Lesbarkeit langer Kennungen ([GOV.UK Bank details](https://design-system.service.gov.uk/patterns/bank-details/)); Feldbreite passend zur erwarteten Länge.
 - IBAN beginnt mit zwei **Buchstaben** → keine reine Zifferntastatur. Ausnahme für rein deutsche Formulare: `DE` als fester Prefix, Rest mit Zifferntastatur.
 - Validierung bei Fokusverlust: Ländercode → Länge je Land → Prüfsumme Mod 97. Fehlertext nennt die konkrete Ursache.
 
 **Formatierungsregeln**
 
-| Regel | Beschreibung | Beispiel |
-|---|---|---|
-| **Zeitpunkt** | Live-Gruppierung während der Eingabe ist vertretbar, weil nur Leerzeichen eingefügt werden. Voraussetzung: Cursor bleibt an der logischen Position, Löschen über ein Gruppenleerzeichen löscht das vorherige Zeichen | – |
-| **Vierergruppen** | Leerzeichen nach jedem vierten Zeichen, letzte Gruppe variabel (Papierformat nach ISO 13616) | `DE89370400440532013000` → `DE89 3704 0044 0532 0130 00` |
-| **Großschreibung** | Kleinbuchstaben sofort in Großbuchstaben umwandeln | `de89` → `DE89` |
-| **Wert ohne Trennzeichen** | `value` im elektronischen Format: ohne Leerzeichen, Großbuchstaben | `DE89 3704 …` → `DE89370400440532013000` |
+| Regel                         | Beschreibung                                                                                                                                                                                                                                       | Eingabe                             | Anzeigewert                                                        | Datenwert                |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------ | ------------------------ |
+| Live gruppieren               | Nur Leerzeichen werden eingefügt, daher schon während der Eingabe zulässig. Cursor bleibt an der logischen Position; Löschen über ein Gruppenleerzeichen löscht das vorherige Zeichen                                                              | `DE893704`                          | `DE89 3704`                                                        | `DE893704`               |
+| In Vierergruppen anzeigen     | Papierformat nach ISO 13616: Leerzeichen nach jedem 4. Zeichen, letzte Gruppe variabel. Datenwert im elektronischen Format ohne Leerzeichen ([CNB](https://www.cnb.cz/en/payments/iban/iban-international-bank-account-number-basic-information/)) | `DE89370400440532013000`            | `DE89 3704 0044 0532 0130 00`                                      | `DE89370400440532013000` |
+| Kleinbuchstaben großschreiben | Sofort umwandeln; eine IBAN enthält nur Großbuchstaben                                                                                                                                                                                             | `de89370400440532013000`            | `DE89 3704 0044 0532 0130 00`                                      | `DE89370400440532013000` |
+| Fremde Trennzeichen ersetzen  | Bindestriche und Punkte werden entfernt, die Gruppierung übernimmt das Leerzeichen                                                                                                                                                                 | `DE89-3704-0044-0532-0130-00`       | `DE89 3704 0044 0532 0130 00`                                      | `DE89370400440532013000` |
+| Präfix entfernen              | `IBAN:` gehört nicht zur Kennung                                                                                                                                                                                                                   | `IBAN: DE89 3704 0044 0532 0130 00` | `DE89 3704 0044 0532 0130 00`                                      | `DE89370400440532013000` |
+| Zu kurze IBAN ablehnen        | Nicht auffüllen oder kürzen; Fehlermeldung nennt die erwartete Länge                                                                                                                                                                               | `DE89 3704 0044 0532 0130 0`        | Fehler: „Die IBAN ist zu kurz. Eine deutsche IBAN hat 22 Zeichen.“ | –                        |
 
-Beispiele:
-
-| Eingabe | Anzeige | `value` |
-|---|---|---|
-| `de89370400440532013000` | `DE89 3704 0044 0532 0130 00` | `DE89370400440532013000` |
-| `DE89-3704-0044-0532-0130-00` | `DE89 3704 0044 0532 0130 00` | `DE89370400440532013000` |
-| `IBAN: DE89 3704 0044 0532 0130 00` | `DE89 3704 0044 0532 0130 00` | `DE89370400440532013000` |
-| `DE89 3704 0044 0532 0130 0` | Fehler: „Die IBAN ist zu kurz. Eine deutsche IBAN hat 22 Zeichen.“ | – |
-
-**Copy/Paste (Normalisierung)**
+**Verhalten bei Copy/Paste (Normalisierung)**
 
 - Häufigster Eingabeweg (aus Rechnungs-PDF, Banking-App, E-Mail).
 - Entfernen: Leerzeichen, geschützte Leerzeichen, Bindestriche, Punkte, Präfix `IBAN`/`IBAN:`.
 - Keine Längenbegrenzung des Feldinhalts – sonst wird gruppiert eingefügter Text abgeschnitten.
 - Nach dem Einfügen sofort gruppiert anzeigen, damit der Abgleich mit der Quelle möglich ist.
 
-**Sprachwechsel**
+**Verhalten bei Sprachwechsel**
 
-- Format ist sprachunabhängig. Nur Hinweis- und Fehlertexte werden übersetzt.
+- **Format ist sprachunabhängig**: Gruppierung und Datenwert folgen ISO 13616, nicht der Locale. `DE89 3704 0044 0532 0130 00` sieht in jeder Sprache gleich aus.
+- **Nur Texte wechseln**: Label, Hinweis- und Fehlertexte werden übersetzt.
 
 #### Web
 
@@ -419,46 +385,31 @@ Beispiele:
 
 #### Plattformübergreifend
 
-**Darstellung**
-
-| Locale | Anzeige |
-|---|---|
-| `de-DE` | `12,5 %` (geschütztes Leerzeichen, DIN 5008) |
-| `de-CH` | `12.5%` (laut CLDR ohne Leerzeichen) |
-| `en-US` | `12.5%` |
-| `fr-FR` | `12,5 %` (schmales geschütztes Leerzeichen) |
-| `tr-TR` | `%12,5` (Zeichen vorangestellt) |
-
 - Festlegen und dokumentieren, ob `value` den **Prozentwert** (`12.5`) oder den **Anteil** (`0.125`) speichert. Prozent-Formatter aller Plattformen erwarten den Anteil und multiplizieren mit 100.
 - Wertebereich fachlich definieren: 0–100 bei Anteilen, aber > 100 und negativ bei Veränderungsraten möglich.
+- Beispiele unten: 1 Nachkommastelle, Datenwert als Prozentwert.
 
 **Formatierungsregeln**
 
-| Regel | Beschreibung | Beispiel (`de-DE`) |
-|---|---|---|
-| **Zeitpunkt** | Formatierung erst bei Fokusverlust | – |
-| **Dezimaltrenner** | Dezimaltrenner der Locale, unabhängig vom eingegebenen Zeichen | `12.5` → `12,5 %` |
-| **Nachkommastellen** | Anzahl fachlich festlegen (z. B. Zinssatz 2–3 Stellen, Rabatt 0 Stellen); fehlende Stellen auffüllen, überzählige runden | `12` → `12,0 %` |
-| **Rundung** | Auf die definierte Genauigkeit runden, um Gleitkomma-Artefakte zu vermeiden | `0.1 * 100 = 10.000000000000002` → `10,0 %` |
-| **Prozentzeichen** | Als Suffix **außerhalb des editierbaren Texts**, im Feld nur die Zahl. Abstand und Position nach Locale (siehe Darstellung) | `12,5` + `%` |
+| Regel                                 | Beschreibung                                                                                                                                                                                                                          | Eingabe | Anzeigewert                                                      | Datenwert |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ---------------------------------------------------------------- | --------- |
+| Formatierung nach Fokusverlust        | Während der Eingabe bleibt der Text unverändert; formatiert wird erst bei Fokusverlust                                                                                                                                                | `12,5`  | Im Fokus: `12,5`<br/>nach Fokusverlust de: `12,5 %`, en: `12.5%` | `12.5`    |
+| Fehlende Nachkommastellen auffüllen   | Anzahl fachlich festgelegt (z. B. Zinssatz 2–3 Stellen, Rabatt 0 Stellen)                                                                                                                                                             | `12`    | de: `12,0 %`<br/>en: `12.0%`                                     | `12.0`    |
+| Dezimaltrenner der Locale anzeigen    | Komma und Punkt werden beide angenommen; Trennzeichen-Regeln wie bei Währungsbeträgen                                                                                                                                                 | `12.5`  | de: `12,5 %`<br/>en: `12.5%`                                     | `12.5`    |
+| Prozentzeichen aus dem Feld entfernen | `%` steht außerhalb des editierbaren Texts. Abstand und Position nach Locale: `de-DE` mit geschütztem Leerzeichen (DIN 5008), `de-CH` und `en-US` ohne, `fr-FR` mit schmalem geschütztem Leerzeichen, `tr-TR` vorangestellt (`%12,5`) | `12,5%` | de: `12,5 %`<br/>en: `12.5%`                                     | `12.5`    |
+| Überzählige Nachkommastellen runden   | Auf die definierte Genauigkeit runden; vermeidet auch Gleitkomma-Artefakte (`0.1 * 100 = 10.000000000000002`)                                                                                                                         | `12,34` | de: `12,3 %`<br/>en: `12.3%`                                     | `12.3`    |
+| Wertebereich prüfen                   | Werte über 100 sind je nach Fachlichkeit gültig (Veränderungsrate) oder ein Fehler (Anteil)                                                                                                                                           | `150`   | de: `150,0 %` oder Fehler<br/>en: `150.0%` oder Fehler           | `150.0`   |
 
-Beispiele (`de-DE`, 1 Nachkommastelle):
-
-| Eingabe | Anzeige | `value` (Prozentwert) |
-|---|---|---|
-| `12` | `12,0 %` | `12.0` |
-| `12.5` | `12,5 %` | `12.5` |
-| `12,5%` | `12,5 %` | `12.5` |
-| `150` | `150,0 %` oder Fehler – abhängig vom erlaubten Bereich | `150.0` |
-
-**Copy/Paste (Normalisierung)**
+**Verhalten bei Copy/Paste (Normalisierung)**
 
 - `%`, `Prozent`, `pct` und Leerzeichen entfernen; Trennzeichen-Regeln wie bei Währungsbeträgen.
 - Eingefügter Anteil (`0,125`) wird **nicht** automatisch als 12,5 % interpretiert – Wert bleibt `0,125 %`, ggf. Plausibilitätshinweis.
 
-**Sprachwechsel**
+**Verhalten bei Sprachwechsel**
 
-- Dezimaltrenner, Leerzeichen und Position des `%` wechseln mit der Locale; der Wert bleibt.
+- **Daten bleiben, Anzeige wechselt**: Der Wert (`12.5`) ändert sich nicht. Dezimaltrenner, Leerzeichen und Position des `%` folgen der neuen Locale: `12,5 %` (`de-DE`) → `12.5%` (`en-US`).
+- **Kein Umformatieren im Fokus**: Ein fokussiertes Feld behält seinen Text und wird erst beim nächsten Fokusverlust in der neuen Locale formatiert.
+- **Parser und Formatter aus einer Quelle**: Der Parser liest die Trennzeichen aus dem Formatter des Felds, damit die angezeigte Schreibweise immer wieder eingelesen werden kann.
 
 #### Web
 
@@ -490,46 +441,41 @@ Beispiele (`de-DE`, 1 Nachkommastelle):
 
 Zwei fachlich verschiedene Fälle, die nicht vermischt werden:
 
-| Fall | Beispiel | Anzeige `de-DE` | Anzeige `en-US` |
-|---|---|---|---|
-| **Dezimalstunden** (Arbeitszeit, Abrechnung) | 7,5 Stunden | `7,5 Std.` / `7,5 h` | `7.5 hr` / `7.5 h` |
-| **Dauer in Stunden und Minuten** | 7 Std. 30 Min. | `7:30 Std.` oder `7 Std. 30 Min.` | `7:30 h` oder `7 hr 30 min` |
+| Fall                                         | Beispiel       | Anzeige `de-DE`                   | Anzeige `en-US`             |
+| -------------------------------------------- | -------------- | --------------------------------- | --------------------------- |
+| **Dezimalstunden** (Arbeitszeit, Abrechnung) | 7,5 Stunden    | `7,5 Std.` / `7,5 h`              | `7.5 hr` / `7.5 h`          |
+| **Dauer in Stunden und Minuten**             | 7 Std. 30 Min. | `7:30 Std.` oder `7 Std. 30 Min.` | `7:30 h` oder `7 hr 30 min` |
 
 Uhrzeiten (`14:30 Uhr`) sind ein eigener Eingabetyp und nicht Teil dieses Abschnitts.
 
 - `value` als **Minuten (Integer)** oder ISO-8601-Dauer (`PT7H30M`), nicht als Dezimalzahl mit Rundungsfehlern (`7.333…`).
 - Der Doppelpunkt fehlt auf allen reinen Ziffernblöcken von iOS. Für `H:MM` daher: Volltastatur auf Ziffernebene, zwei Felder (Stunden, Minuten) oder Dezimaleingabe mit Umrechnung bei Fokusverlust.
+- Beispiele unten: Feld „Dauer“, Anzeige `H:MM`, Datenwert in Minuten.
 
 **Formatierungsregeln**
 
-| Regel | Beschreibung | Beispiel (Feld „Dauer“) |
-|---|---|---|
-| **Zeitpunkt** | Formatierung erst bei Fokusverlust; danach ist sichtbar, wie die Eingabe interpretiert wurde | – |
-| **Format `H:MM`** | Stunden ohne führende Null, Minuten immer zweistellig | `7` → `7:00` |
-| **Dezimal-Umrechnung** | Dezimalstunden in Stunden und Minuten umrechnen (Nachkommaanteil × 60) | `7,5` → `7:30` |
-| **Keine 24-Stunden-Grenze** | Werte > 24 Std. sind bei Dauern gültig, bei Uhrzeiten nicht | `38:30` bleibt `38:30` |
-| **Einheit** | Als Suffix außerhalb des Felds (`Std.`, `h`) | `7:30` + `Std.` |
+| Regel                                 | Beschreibung                                                                                              | Eingabe               | Anzeigewert                                     | Datenwert |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------- | --------------------- | ----------------------------------------------- | --------- |
+| Formatierung nach Fokusverlust        | Während der Eingabe bleibt der Text unverändert; danach ist sichtbar, wie die Eingabe interpretiert wurde | `7,5`                 | Im Fokus: `7,5`<br/>nach Fokusverlust: `7:30`   | `450`     |
+| Dezimalstunden umrechnen              | Nachkommaanteil × 60 ergibt die Minuten; Komma und Punkt gleichwertig                                     | `7,5` / `7.5`         | `7:30`                                          | `450`     |
+| Kanonisches Format bleibt unverändert | Eingabe hat schon das Format `H:MM`                                                                       | `7:30`                | `7:30`                                          | `450`     |
+| Einheitenwörter erkennen              | `h`, `Std`, `Stunden`, `min` in UI-Sprache und Englisch werden gelesen und entfernt                       | `7h30` / `7 h 30 min` | `7:30`                                          | `450`     |
+| Minuten zweistellig ergänzen          | Ganze Stunden erhalten `:00`                                                                              | `7`                   | `7:00`                                          | `420`     |
+| Stunden ohne führende Null            | Unter einer Stunde steht `0:`, nicht `00:`                                                                | `0:45` / `,75`        | `0:45`                                          | `45`      |
+| Komma ist dezimal, nicht Minuten      | In einem Dezimalfeld ist `7,30` = 7,3 Std. (= 7:18), nicht 7:30. Eingabeformat im Hinweistext zeigen      | `7,30`                | `7:18`                                          | `438`     |
+| Keine 24-Stunden-Grenze               | Dauern über 24 Std. sind gültig, bei Uhrzeiten nicht                                                      | `38:30`               | `38:30`                                         | `2310`    |
+| Ungültige Minuten ablehnen            | Minuten über 59 ergeben einen Fehler statt einer stillen Umrechnung                                       | `7:75`                | Fehler: „Minuten dürfen höchstens 59 betragen.“ | –         |
+| Einheit außerhalb des Felds           | Einheit als Suffix neben dem Feld, Abkürzung nach Sprache                                                 | `7:30`                | de: `7:30` + `Std.`<br/>en: `7:30` + `h`        | `450`     |
 
-Beispiele (Anzeige `H:MM`, `value` in Minuten):
-
-| Eingabe | Anzeige | `value` |
-|---|---|---|
-| `7,5` / `7.5` | `7:30` | `450` |
-| `7:30` | `7:30` | `450` |
-| `7h30` / `7 h 30 min` | `7:30` | `450` |
-| `7` | `7:00` | `420` |
-| `0:45` / `,75` | `0:45` | `45` |
-| `7:75` | Fehler: „Minuten dürfen höchstens 59 betragen.“ | – |
-
-- Mehrdeutigkeit `7,30`: in einem Dezimalfeld 7,3 Std. (= 7:18), nicht 7:30. Eingabeformat im Hinweistext zeigen und die Interpretation nach Fokusverlust sichtbar machen.
-
-**Copy/Paste (Normalisierung)**
+**Verhalten bei Copy/Paste (Normalisierung)**
 
 - `7:30 h`, `7,5 Std.`, `7h 30m`, `PT7H30M` werden geparst; Einheitenwörter in UI-Sprache **und** Englisch erkennen (`Std`, `Stunden`, `h`, `hrs`, `min`).
 
-**Sprachwechsel**
+**Verhalten bei Sprachwechsel**
 
-- Einheitenabkürzung und Dezimaltrenner wechseln (`7,5 Std.` ↔ `7.5 hr`). `H:MM` bleibt international verständlich und eignet sich daher für mehrsprachige Produkte.
+- **Daten bleiben, Anzeige wechselt**: Der Minutenwert ändert sich nicht. Einheitenabkürzung und Dezimaltrenner folgen der neuen Locale: `7,5 Std.` (`de-DE`) → `7.5 hr` (`en-US`).
+- **`H:MM` für mehrsprachige Produkte**: Das Format ist international verständlich und bleibt bei jedem Sprachwechsel gleich.
+- **Kein Umformatieren im Fokus**: Ein fokussiertes Feld behält seinen Text und wird erst beim nächsten Fokusverlust neu formatiert.
 
 #### Web
 
@@ -555,48 +501,38 @@ Beispiele (Anzeige `H:MM`, `value` in Minuten):
 
 #### Plattformübergreifend
 
-**Darstellung**
-
-| Format | Beispiel | Einsatz |
-|---|---|---|
-| E.164 (`value`) | `+49301234567` | Speicherung, Schnittstellen |
-| International (DIN 5008 / E.123) | `+49 30 1234567` | Anzeige in internationalen Kontexten |
-| National (DIN 5008) | `030 1234567` | Anzeige, wenn Land der Nummer = Region der Nutzenden |
-| Durchwahl | `+49 30 12345-67` | Bindestrich vor Durchwahl |
+| Format                           | Beispiel          | Einsatz                                              |
+| -------------------------------- | ----------------- | ---------------------------------------------------- |
+| E.164 (`value`)                  | `+49301234567`    | Speicherung, Schnittstellen                          |
+| International (DIN 5008 / E.123) | `+49 30 1234567`  | Anzeige in internationalen Kontexten                 |
+| National (DIN 5008)              | `030 1234567`     | Anzeige, wenn Land der Nummer = Region der Nutzenden |
+| Durchwahl                        | `+49 30 12345-67` | Bindestrich vor Durchwahl                            |
 
 - Ein einzelnes Feld; optional ein suchbares Ländervorwahl-Auswahlfeld. Keine Aufteilung in mehrere Felder.
 - Keine Längenbegrenzung des Feldinhalts (7–15 Ziffern plus Formatierungszeichen).
+- Beispiele unten: Standardregion DE.
 
 **Formatierungsregeln**
 
-| Regel | Beschreibung | Beispiel (Standardregion DE) |
-|---|---|---|
-| **Zeitpunkt** | Eingabe nicht live umformatieren – GOV.UK empfiehlt, alle Schreibweisen zu akzeptieren ([GOV.UK](https://design-system.service.gov.uk/patterns/phone-numbers/)). Bei Fokusverlust: parsen (Standardregion = gewähltes Land oder Region der Nutzenden), formatieren, E.164 als `value` speichern | – |
-| **Land der Nummer** | Formatierung immer nach dem Land der Nummer (libphonenumber bzw. Plattform-APIs), nicht nach der UI-Sprache | `+41 44 668 18 00` bleibt im Schweizer Format |
-| **Leerzeichen nach DIN 5008** | Leerzeichen nach Ländervorwahl und nach Ortsvorwahl, keine weiteren Gruppen im Teilnehmeranschluss ([teltarif](https://www.teltarif.de/festnetz/telefonnummer-schreibweise.html)) | `0171/1234567` → `0171 1234567` |
-| **Keine `(0)`** | Die `0` der Ortsvorwahl entfällt nach `+49`; `+49 (0)30 …` gilt als falsch | `+49 (0)30 123 45 67` → `+49 30 1234567` |
-| **`+` statt `00`** | Internationale Vorwahl mit `+` darstellen | `0049 30 1234567` → `+49 30 1234567` |
-| **Nicht parsebar** | Eingabe unverändert stehen lassen, nicht umformatieren | – |
+| Regel                                 | Beschreibung                                                                                                                                                                                                                                                              | Eingabe               | Anzeigewert                                                 | Datenwert       |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ----------------------------------------------------------- | --------------- |
+| Formatierung nach Fokusverlust        | Nicht live umformatieren, GOV.UK empfiehlt, alle Schreibweisen zu akzeptieren ([GOV.UK](https://design-system.service.gov.uk/patterns/phone-numbers/)). Bei Fokusverlust parsen (Standardregion = gewähltes Land oder Region der Nutzenden), formatieren, E.164 speichern | `0301234567`          | Im Fokus: `0301234567`<br/>nach Fokusverlust: `030 1234567` | `+49301234567`  |
+| Nach Land der Nummer formatieren      | Format folgt dem Land der Nummer (libphonenumber bzw. Plattform-APIs), nicht der UI-Sprache                                                                                                                                                                               | `+41 44 668 18 00`    | `+41 44 668 18 00`                                          | `+41446681800`  |
+| Leerzeichen nach Vorwahl setzen       | DIN 5008: Leerzeichen nach Länder- und Ortsvorwahl, keine weiteren Gruppen im Teilnehmeranschluss ([teltarif](https://www.teltarif.de/festnetz/telefonnummer-schreibweise.html))                                                                                          | `0171/1234567`        | `0171 1234567`                                              | `+491711234567` |
+| `(0)` entfernen                       | Die `0` der Ortsvorwahl entfällt nach `+49`; `+49 (0)30 …` gilt als falsch                                                                                                                                                                                                | `+49 (0)30 123 45 67` | `+49 30 1234567`                                            | `+49301234567`  |
+| `00` als `+` darstellen               | Internationale Vorwahl immer mit `+`                                                                                                                                                                                                                                      | `0049 30 1234567`     | `+49 30 1234567`                                            | `+49301234567`  |
+| Nicht parsebare Eingabe stehen lassen | Text bleibt unverändert, Fehlermeldung statt Umformatierung                                                                                                                                                                                                               | `030 12`              | `030 12` + Fehlermeldung                                    | –               |
 
-Beispiele:
-
-| Eingabe (Standardregion DE) | Anzeige nach Fokusverlust | `value` |
-|---|---|---|
-| `030 1234567` | `030 1234567` | `+49301234567` |
-| `0049 30 1234567` | `+49 30 1234567` | `+49301234567` |
-| `+49 (0)30 123 45 67` | `+49 30 1234567` | `+49301234567` |
-| `+41 44 668 18 00` | `+41 44 668 18 00` | `+41446681800` |
-| `0171/1234567` | `0171 1234567` | `+491711234567` |
-
-**Copy/Paste (Normalisierung)**
+**Verhalten bei Copy/Paste (Normalisierung)**
 
 - Klammern, Bindestriche, Schrägstriche, Punkte, Leerzeichen akzeptieren ([W3C](https://www.w3.org/WAI/WCAG2/supplemental/patterns/o4p08-input-formats/)).
 - `(0)` nach Ländervorwahl entfernen; `00` am Anfang als `+` interpretieren; `tel:`-Präfix entfernen.
 - Weicht die Ländervorwahl im eingefügten Text vom ausgewählten Land ab: Auswahl **nicht automatisch** umstellen, sondern Hinweis anzeigen (WCAG 3.2.2).
 
-**Sprachwechsel**
+**Verhalten bei Sprachwechsel**
 
-- Keine Änderung der Nummernformatierung (Land der Nummer bleibt). Nur Ländernamen in der Vorwahl-Auswahl werden übersetzt.
+- **Format folgt dem Land der Nummer**: Ein Sprachwechsel ändert die Formatierung nicht. `+49 30 1234567` bleibt in jeder Sprache gleich.
+- **Nur Texte wechseln**: Ländernamen in der Vorwahl-Auswahl, Label, Hinweis- und Fehlertexte werden übersetzt.
 
 #### Web
 
@@ -626,18 +562,16 @@ Beispiele:
 
 #### Plattformübergreifend
 
-**Darstellung**
-
-| Land | Format | Beispiel |
-|---|---|---|
-| DE | 5 Ziffern | `01067` |
-| AT, CH | 4 Ziffern | `1010`, `8001` |
-| NL | 4 Ziffern + 2 Buchstaben | `1234 AB` |
-| GB | alphanumerisch, 5–7 Zeichen | `SW1A 1AA` |
-| CA | `A1A 1A1` | `K1A 0A9` |
-| US | 5 oder 5+4 Ziffern | `10001-0001` |
-| PL | `NN-NNN` | `00-950` |
-| IE, HK u. a. | teilweise keine PLZ (Feld optional) | – |
+| Land         | Format                              | Beispiel       |
+| ------------ | ----------------------------------- | -------------- |
+| DE           | 5 Ziffern                           | `01067`        |
+| AT, CH       | 4 Ziffern                           | `1010`, `8001` |
+| NL           | 4 Ziffern + 2 Buchstaben            | `1234 AB`      |
+| GB           | alphanumerisch, 5–7 Zeichen         | `SW1A 1AA`     |
+| CA           | `A1A 1A1`                           | `K1A 0A9`      |
+| US           | 5 oder 5+4 Ziffern                  | `10001-0001`   |
+| PL           | `NN-NNN`                            | `00-950`       |
+| IE, HK u. a. | teilweise keine PLZ (Feld optional) | –              |
 
 - PLZ ist immer ein **String**, nie eine Zahl – `01067` würde sonst zu `1067`.
 - Validierung nur, wenn das Land bekannt ist; sonst nur Länge und erlaubte Zeichen grob prüfen ([W3C](https://w3c.github.io/i18n-drafts/questions/qa-address-formats.en.html)).
@@ -645,22 +579,24 @@ Beispiele:
 
 **Formatierungsregeln**
 
-| Regel | Beschreibung | Beispiel |
-|---|---|---|
-| **Zeitpunkt** | Formatierung erst bei Fokusverlust und nur, wenn das Land bekannt ist | – |
-| **Nur trimmen** | Länder ohne Trennzeichen im Format (DE, AT, CH): nur Leerzeichen am Rand entfernen, führende Null erhalten | ` 01067 ` → `01067` |
-| **Großschreibung** | Buchstaben in Großbuchstaben (NL, GB, CA) | `sw1a 1aa` → `SW1A 1AA` |
-| **Leerzeichen einfügen** | An der Position des Landesformats: NL vor den Buchstaben, GB vor den letzten 3 Zeichen, CA nach dem 3. Zeichen | `1234ab` → `1234 AB` |
-| **Bindestrich einfügen** | US vor der +4-Erweiterung, PL nach den ersten 2 Ziffern | `00950` → `00-950` |
+| Regel                                  | Beschreibung                                                                                               | Eingabe                | Anzeigewert                                         | Datenwert  |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ---------------------- | --------------------------------------------------- | ---------- |
+| Formatierung nach Fokusverlust         | Während der Eingabe bleibt der Text unverändert; formatiert wird erst bei Fokusverlust                     | `1234ab` (NL)          | Im Fokus: `1234ab`<br/>nach Fokusverlust: `1234 AB` | `1234 AB`  |
+| Nur trimmen                            | Länder ohne Trennzeichen im Format (DE, AT, CH): nur Leerzeichen am Rand entfernen, führende Null erhalten | `01067` (DE)           | `01067`                                             | `01067`    |
+| Buchstaben großschreiben               | Gilt für alphanumerische Formate (NL, GB, CA)                                                              | `sw1a 1aa` (GB)        | `SW1A 1AA`                                          | `SW1A 1AA` |
+| Leerzeichen nach Landesformat einfügen | NL vor den Buchstaben, GB vor den letzten 3 Zeichen, CA nach dem 3. Zeichen                                | `k1a0a9` (CA)          | `K1A 0A9`                                           | `K1A 0A9`  |
+| Bindestrich nach Landesformat einfügen | US vor der +4-Erweiterung, PL nach den ersten 2 Ziffern                                                    | `00950` (PL)           | `00-950`                                            | `00-950`   |
+| Bei unbekanntem Land nicht formatieren | Ohne Land keine feste Schreibweise; nur Länge und erlaubte Zeichen grob prüfen                             | `sw1a1aa` (Land fehlt) | `sw1a1aa`                                           | `sw1a1aa`  |
 
-**Copy/Paste (Normalisierung)**
+**Verhalten bei Copy/Paste (Normalisierung)**
 
 - Ländercode-Präfixe entfernen (`D-01067`, `DE-01067`, `CH-8001`) – ältere Schreibweise auf Briefen.
 - Ist erkennbar eine komplette Adresse eingefügt, Hinweis anzeigen statt Teile still zu übernehmen.
 
-**Sprachwechsel**
+**Verhalten bei Sprachwechsel**
 
-- Format hängt vom **Land der Adresse** ab, nicht von der UI-Sprache. Nur Label („PLZ“ / „Postcode“ / „ZIP code“) und Hinweistexte wechseln.
+- **Format folgt dem Land der Adresse**: Ein Sprachwechsel ändert die Formatierung nicht. `1234 AB` bleibt in jeder Sprache gleich.
+- **Nur Texte wechseln**: Label („PLZ“ / „Postcode“ / „ZIP code“), Hinweis- und Fehlertexte werden übersetzt.
 
 #### Web
 
@@ -723,11 +659,11 @@ Beispiele:
 
 ### Plattformspezifisch
 
-| Plattform | Umsetzung |
-|---|---|
-| Web | `aria-describedby` für Hinweis und Fehler, `aria-invalid`, `aria-live="polite"` für Fehlertexte, kein `role="spinbutton"` ohne Stepper |
-| iOS | `accessibilityLabel` inkl. Einheit, `accessibilityHint` für Format, Fehler per `UIAccessibility.post(notification: .announcement, …)` |
-| Android | Compose `semantics { contentDescription; error(...) }`, `supportingText` für Hinweis; Material `TextInputLayout` mit `prefixText`/`suffixText` – Ansage durch TalkBack auf Geräten prüfen |
+| Plattform | Umsetzung                                                                                                                                                                                 |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Web       | `aria-describedby` für Hinweis und Fehler, `aria-invalid`, `aria-live="polite"` für Fehlertexte, kein `role="spinbutton"` ohne Stepper                                                    |
+| iOS       | `accessibilityLabel` inkl. Einheit, `accessibilityHint` für Format, Fehler per `UIAccessibility.post(notification: .announcement, …)`                                                     |
+| Android   | Compose `semantics { contentDescription; error(...) }`, `supportingText` für Hinweis; Material `TextInputLayout` mit `prefixText`/`suffixText` – Ansage durch TalkBack auf Geräten prüfen |
 
 ### Visuell und motorisch
 
@@ -741,16 +677,16 @@ Beispiele:
 
 ### Design Systeme im Vergleich
 
-| Design System | Ansatz | Mobile | Quelle |
-|---|---|---|---|
-| **GOV.UK** | Keine Masken, alle Schreibweisen akzeptieren, `type="text"` + `inputmode="numeric"`, Bankdaten mit Zeichenabstand und konkreten Fehlertexten | Web-mobil | [Bank details](https://design-system.service.gov.uk/patterns/bank-details/), [Phone numbers](https://design-system.service.gov.uk/patterns/phone-numbers/), [Blog type=number](https://technology.blog.gov.uk/2020/02/24/why-the-gov-uk-design-system-team-changed-the-input-type-for-numbers/) |
-| **Material Design 3** | Prefix/Suffix-Text im Feld; Android: `OutputTransformation` trennt Wert und Anzeige | Android nativ | [Material Web Text field](https://github.com/material-components/material-web/blob/main/docs/components/text-field.md), [OutputTransformation](https://developer.android.com/reference/kotlin/androidx/compose/foundation/text/input/OutputTransformation) |
-| **Apple HIG / SwiftUI** | Passende Tastatur pro Feld, Formatter statt Freitext, Formatierung bei Submit | iOS nativ | [TextField(value:format:)](https://developer.apple.com/documentation/swiftui/textfield/init(_:value:format:prompt:)), [UIKeyboardType](https://developer.apple.com/documentation/uikit/uikeyboardtype) |
-| **Adobe Spectrum / React Aria** | NumberField mit `Intl.NumberFormat`-Optionen (Währung, Prozent, Einheit), locale-tolerantes Parsing, OS-abhängiger `inputmode` | Web-mobil | [NumberField-Internationalisierung](https://react-aria.adobe.com/blog/how-we-internationalized-our-numberfield), [React Spectrum NumberField](https://react-spectrum.adobe.com/react-spectrum/NumberField.html) |
-| **Shopify Polaris** | CLDR-basierte Währungsformate, Short vs. Explicit Format (mit ISO-Code) | – | [Formatting localized currency](https://polaris.shopify.com/foundations/formatting-localized-currency) |
-| **SAP Fiori** | Currency-Control formatiert nach Locale und Währungs-Dezimalstellen; Validierung bei Fokusverlust | – | [Currency](https://www.sap.com/design-system/fiori-design-web/v1-96/ui-elements/currency/usage), [Form Field Validation](https://www.sap.com/design-system/fiori-design-web/v1-136/ui-elements/form-field-validation/usage) |
-| **CMS Design System** | „Label Masked Field“: Format im Label, Formatierung erst bei Blur | Web | [Label masked field](https://design.cms.gov/components/text-field/label-masked-field) |
-| **Pega** | Number Input formatiert nach Locale bereits während der Eingabe (Gegenbeispiel zum Blur-Prinzip) | – | [Number input](https://design.pega.com/components/form-controls/number-input/) |
+| Design System                   | Ansatz                                                                                                                                       | Mobile        | Quelle                                                                                                                                                                                                                                                                                          |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **GOV.UK**                      | Keine Masken, alle Schreibweisen akzeptieren, `type="text"` + `inputmode="numeric"`, Bankdaten mit Zeichenabstand und konkreten Fehlertexten | Web-mobil     | [Bank details](https://design-system.service.gov.uk/patterns/bank-details/), [Phone numbers](https://design-system.service.gov.uk/patterns/phone-numbers/), [Blog type=number](https://technology.blog.gov.uk/2020/02/24/why-the-gov-uk-design-system-team-changed-the-input-type-for-numbers/) |
+| **Material Design 3**           | Prefix/Suffix-Text im Feld; Android: `OutputTransformation` trennt Wert und Anzeige                                                          | Android nativ | [Material Web Text field](https://github.com/material-components/material-web/blob/main/docs/components/text-field.md), [OutputTransformation](https://developer.android.com/reference/kotlin/androidx/compose/foundation/text/input/OutputTransformation)                                      |
+| **Apple HIG / SwiftUI**         | Passende Tastatur pro Feld, Formatter statt Freitext, Formatierung bei Submit                                                                | iOS nativ     | [TextField(value:format:)](<https://developer.apple.com/documentation/swiftui/textfield/init(_:value:format:prompt:)>), [UIKeyboardType](https://developer.apple.com/documentation/uikit/uikeyboardtype)                                                                                        |
+| **Adobe Spectrum / React Aria** | NumberField mit `Intl.NumberFormat`-Optionen (Währung, Prozent, Einheit), locale-tolerantes Parsing, OS-abhängiger `inputmode`               | Web-mobil     | [NumberField-Internationalisierung](https://react-aria.adobe.com/blog/how-we-internationalized-our-numberfield), [React Spectrum NumberField](https://react-spectrum.adobe.com/react-spectrum/NumberField.html)                                                                                 |
+| **Shopify Polaris**             | CLDR-basierte Währungsformate, Short vs. Explicit Format (mit ISO-Code)                                                                      | –             | [Formatting localized currency](https://polaris.shopify.com/foundations/formatting-localized-currency)                                                                                                                                                                                          |
+| **SAP Fiori**                   | Currency-Control formatiert nach Locale und Währungs-Dezimalstellen; Validierung bei Fokusverlust                                            | –             | [Currency](https://www.sap.com/design-system/fiori-design-web/v1-96/ui-elements/currency/usage), [Form Field Validation](https://www.sap.com/design-system/fiori-design-web/v1-136/ui-elements/form-field-validation/usage)                                                                     |
+| **CMS Design System**           | „Label Masked Field“: Format im Label, Formatierung erst bei Blur                                                                            | Web           | [Label masked field](https://design.cms.gov/components/text-field/label-masked-field)                                                                                                                                                                                                           |
+| **Pega**                        | Number Input formatiert nach Locale bereits während der Eingabe (Gegenbeispiel zum Blur-Prinzip)                                             | –             | [Number input](https://design.pega.com/components/form-controls/number-input/)                                                                                                                                                                                                                  |
 
 ### UX-Forschung und Standards
 
@@ -773,5 +709,6 @@ Beispiele:
 ### Offene Punkte für Gerätetests
 
 - Welches Dezimalzeichen zeigen Gboard und Samsung Keyboard bei `inputmode="decimal"` und `KeyboardType.Decimal` für `de-DE`, `de-CH`, `en-DE`?
+- Formatieren Browser (Chrome, Safari, Firefox), iOS (`FormatStyle`, `NumberFormatter`) und Android (`NumberFormat`, ICU) Beträge in `en-DE` ebenfalls als `€1,234.50`, während Zahlen ohne Währung als `1.234,5` erscheinen? Geprüft bisher nur mit Node 24 (ICU 78.2).
 - Wie sagen VoiceOver und TalkBack Prefix/Suffix (Material `TextInputLayout`, SwiftUI-Overlay) an?
 - Vorlesen von IBAN und Telefonnummer mit und ohne Gruppierung in VoiceOver, TalkBack, NVDA, JAWS.

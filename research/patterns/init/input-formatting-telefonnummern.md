@@ -1,26 +1,19 @@
 ---
 meta:
-  title: Input-Formatierung – Telefonnummern (plattformübergreifend)
-  description: Plattformübergreifende Aufstellung der Formatierungsregeln für Telefonnummern in Web, iOS und Android
+  title: Input-Formatierung – Telefonnummern
+  description: Plattformübergreifende Formatierungsregeln für Telefonnummern mit Vorgaben für Web, iOS und Android
 relatedTopics: ["patterns/input-formatting", "patterns/input-formatting-plattformen", "patterns/form-layout"]
 layout: common
 ---
 
-## Verwendung
+Gliederung wie die Eingabetypen in [input-formatting-plattformen.md](./input-formatting-plattformen.md#telefonnummern):
 
-Telefonnummern sind Kennungen, keine Zahlen. Formatierung macht sie lesbar und abgleichbar: `+49 30 1234567` ist schneller erfassbar als `+49301234567`. Gleichzeitig sind Telefonfelder fehleranfällig: Nutzende tippen und fügen Nummern in vielen Schreibweisen ein.
-
-Leitsätze:
-
-- **Formatierung ist Darstellung, nicht Daten.** Gespeichert wird immer E.164 (`+49301234567`).
-- **Alle Schreibweisen akzeptieren**, erst bei Fokusverlust formatieren.
-- **Nummer als String behandeln**, niemals als Zahl (führende `0` und `+` gehen sonst verloren).
-
-Quelle: Auszug und Vertiefung aus [input-formatting-plattformen.md](./input-formatting-plattformen.md#telefonnummern).
+- **Plattformübergreifend**: Grundlagen, Formatierungsregeln mit Beispielen, Verhalten bei Copy/Paste, Verhalten bei Sprachwechsel
+- **Web**, **iOS**, **Android**: Feldkonfiguration und Tastatur, Zeitpunkt und API der Formatierung, Copy/Paste, Barrierefreiheit
 
 ---
 
-## Zielformate
+## Plattformübergreifend
 
 | Format                           | Beispiel          | Einsatz                                              |
 | -------------------------------- | ----------------- | ---------------------------------------------------- |
@@ -29,64 +22,53 @@ Quelle: Auszug und Vertiefung aus [input-formatting-plattformen.md](./input-form
 | National (DIN 5008)              | `030 1234567`     | Anzeige, wenn Land der Nummer = Region der Nutzenden |
 | Durchwahl                        | `+49 30 12345-67` | Bindestrich vor Durchwahl                            |
 
----
-
-## Regeln im Überblick (alle Plattformen)
-
-| Regel                                 | Beschreibung                                                           | Eingabe               | Anzeigewert (nach Fokusverlust) | Datenwert       |
-| ------------------------------------- | ---------------------------------------------------------------------- | --------------------- | ------------------------------- | --------------- |
-| Formatierung nach Fokusverlust        | Im Fokus nicht umformatieren; dann parsen, formatieren, E.164 speichern | `0301234567`          | `030 1234567`                   | `+49301234567`  |
-| Nach Land der Nummer formatieren      | Format folgt dem Land der Nummer, nicht der UI-Sprache                 | `+41 44 668 18 00`    | `+41 44 668 18 00`              | `+41446681800`  |
-| Leerzeichen nach Vorwahl              | DIN 5008: Leerzeichen nach Länder- und Ortsvorwahl                     | `0171/1234567`        | `0171 1234567`                  | `+491711234567` |
-| `(0)` entfernen                       | Die `0` der Ortsvorwahl entfällt nach `+49`                            | `+49 (0)30 123 45 67` | `+49 30 1234567`                | `+49301234567`  |
-| `00` als `+` darstellen               | Internationale Vorwahl immer mit `+`                                   | `0049 30 1234567`     | `+49 30 1234567`                | `+49301234567`  |
-| `tel:`-Präfix entfernen               | Beim Einfügen aus Links                                                | `tel:+4930123456`     | `+49 30 123456`                 | `+4930123456`   |
-| Nicht parsebare Eingabe stehen lassen | Keine Umformatierung, stattdessen Fehlermeldung                        | `030 12`              | `030 12` + Fehlermeldung        | –               |
-
-Weitere übergreifende Vorgaben:
-
 - Ein einzelnes Feld; optional ein suchbares Ländervorwahl-Auswahlfeld. Keine Aufteilung in mehrere Felder.
 - Keine Längenbegrenzung des Feldinhalts (7–15 Ziffern plus Formatierungszeichen).
-- Klammern, Bindestriche, Schrägstriche, Punkte und Leerzeichen akzeptieren.
-- Standardregion für das Parsen: gewähltes Land, sonst Region der Nutzenden.
-- Weicht die Ländervorwahl im eingefügten Text vom gewählten Land ab: Auswahl nicht automatisch umstellen, sondern Hinweis anzeigen (WCAG 3.2.2).
-- Sprachwechsel ändert die Formatierung nicht; nur Label, Hinweis-, Fehlertexte und Ländernamen werden übersetzt.
+- Telefonnummern sind Kennungen und werden als String gespeichert, nie als Zahl.
+- Beispiele unten: Standardregion DE.
+
+### Formatierungsregeln
+
+| Regel                                 | Beschreibung                                                                                                                                                                                                                                                              | Eingabe               | Anzeigewert                                                 | Datenwert       |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ----------------------------------------------------------- | --------------- |
+| Formatierung nach Fokusverlust        | Nicht live umformatieren, GOV.UK empfiehlt, alle Schreibweisen zu akzeptieren ([GOV.UK](https://design-system.service.gov.uk/patterns/phone-numbers/)). Bei Fokusverlust parsen (Standardregion = gewähltes Land oder Region der Nutzenden), formatieren, E.164 speichern | `0301234567`          | Im Fokus: `0301234567`<br/>nach Fokusverlust: `030 1234567` | `+49301234567`  |
+| Nach Land der Nummer formatieren      | Format folgt dem Land der Nummer (libphonenumber bzw. Plattform-APIs), nicht der UI-Sprache                                                                                                                                                                               | `+41 44 668 18 00`    | `+41 44 668 18 00`                                          | `+41446681800`  |
+| Leerzeichen nach Vorwahl setzen       | DIN 5008: Leerzeichen nach Länder- und Ortsvorwahl, keine weiteren Gruppen im Teilnehmeranschluss ([teltarif](https://www.teltarif.de/festnetz/telefonnummer-schreibweise.html))                                                                                          | `0171/1234567`        | `0171 1234567`                                              | `+491711234567` |
+| `(0)` entfernen                       | Die `0` der Ortsvorwahl entfällt nach `+49`; `+49 (0)30 …` gilt als falsch                                                                                                                                                                                                | `+49 (0)30 123 45 67` | `+49 30 1234567`                                            | `+49301234567`  |
+| `00` als `+` darstellen               | Internationale Vorwahl immer mit `+`                                                                                                                                                                                                                                      | `0049 30 1234567`     | `+49 30 1234567`                                            | `+49301234567`  |
+| Nicht parsebare Eingabe stehen lassen | Text bleibt unverändert, Fehlermeldung statt Umformatierung                                                                                                                                                                                                               | `030 12`              | `030 12` + Fehlermeldung                                    | –               |
+
+### Verhalten bei Copy/Paste (Normalisierung)
+
+- Klammern, Bindestriche, Schrägstriche, Punkte, Leerzeichen akzeptieren ([W3C](https://www.w3.org/WAI/WCAG2/supplemental/patterns/o4p08-input-formats/)).
+- `(0)` nach Ländervorwahl entfernen; `00` am Anfang als `+` interpretieren; `tel:`-Präfix entfernen.
+- Weicht die Ländervorwahl im eingefügten Text vom ausgewählten Land ab: Auswahl **nicht automatisch** umstellen, sondern Hinweis anzeigen (WCAG 3.2.2).
+
+### Verhalten bei Sprachwechsel
+
+- **Format folgt dem Land der Nummer**: Ein Sprachwechsel ändert die Formatierung nicht. `+49 30 1234567` bleibt in jeder Sprache gleich.
+- **Nur Texte wechseln**: Ländernamen in der Vorwahl-Auswahl, Label, Hinweis- und Fehlertexte werden übersetzt.
 
 ---
 
-## Plattformvergleich
+## Web
 
-| Aspekt                 | Web                                                                     | iOS                                                        | Android                                                                   |
-| ---------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Feldtyp                | `<input type="tel">`                                                    | `TextField` mit `.keyboardType(.phonePad)`                 | `TextField` mit `KeyboardType.Phone`; Views `inputType="phone"`           |
-| Autofill                | `autocomplete="tel"` (getrennt: `tel-country-code` + `tel-national`)    | `.textContentType(.telephoneNumber)`                       | Compose `ContentType.PhoneNumber`; Views `autofillHints="phone"`          |
-| Tastatur               | iOS: Ziffernblock mit `+ * #`; Android: Ziffernblock mit `+ ( ) -`      | `.phonePad`: `0–9 + * #`, keine Return-Taste               | Ziffernblock mit `+ * # ( ) -`                                            |
-| Zeitpunkt Formatierung | `blur`                                                                  | Fokusverlust / Submit                                      | Fokusverlust                                                              |
-| Formatter              | `libphonenumber-js` (`formatInternational()`, `.number` für E.164)      | `PhoneNumberKit` (keine öffentliche Apple-API)             | `PhoneNumberUtils.formatNumber(number, countryIso)` oder libphonenumber   |
-| Live-Formatierung      | Nicht empfohlen                                                         | Systemweite Live-Formatierung für Drittfelder nicht verfügbar | `PhoneNumberFormattingTextWatcher` (Views), nur bei Formularen mit einem Land |
-| Einfügen               | Autofill liefert oft `+49…`; Ländervorwahl nur vorbelegen, wenn leer    | QuickType-Vorschlag im Kontaktformat; `.phonePad` nur Einfügen über Kontextmenü | `InputTransformation` darf `tel:` entfernen; sonst alle Zeichen zulassen |
-| Nicht verwenden        | `pattern`, `maxlength`                                                  | –                                                          | –                                                                         |
+- **Feld**: `type="tel"`, `autocomplete="tel"` (bei getrennter Ländervorwahl `tel-country-code` + `tel-national`); kein `pattern`, kein `maxlength`.
+- **Tastatur**: iOS Telefon-Ziffernblock mit `+ * #`; Android Ziffernblock der Tastatur-App mit `+ ( ) -`.
+- **Formatierung**: bei `blur` mit `libphonenumber-js` (`parsePhoneNumber(text, defaultCountry).formatInternational()` / `.number` für E.164).
+- **Copy/Paste**: Autofill liefert häufig `+49…` – Ländervorwahl-Auswahl daraus nur vorbelegen, wenn sie leer ist.
+- **Barrierefreiheit**: Länderauswahl als `<select>` oder Combobox mit Textnamen; Flaggen nur dekorativ (`alt=""`).
 
----
+## iOS
 
-## Barrierefreiheit
+- **Feld**: `.keyboardType(.phonePad)`, `.textContentType(.telephoneNumber)`; Toolbar mit „Fertig“ (keine Return-Taste).
+- **Formatierung**: bei Fokusverlust mit `PhoneNumberKit` (Port von libphonenumber); Apple bietet keine öffentliche API zur Telefonnummern-Formatierung. Die systemweite Live-Formatierung aus der Telefon-App ist für Drittfelder nicht verfügbar.
+- **Copy/Paste**: AutoFill-Vorschlag in der QuickType-Leiste liefert die eigene Nummer im Format der Kontakte – Parser muss Leerzeichen, Klammern und Bindestriche akzeptieren. `.phonePad` bietet nur über das Kontextmenü Einfügen.
+- **Barrierefreiheit**: `.accessibilityLabel("Telefonnummer")`, Hinweis zur Ländervorwahl als `.accessibilityHint`.
 
-| Plattform | Vorgaben                                                                                                          |
-| --------- | ----------------------------------------------------------------------------------------------------------------- |
-| Web       | Sichtbares `<label>`; Länderauswahl als `<select>` oder Combobox mit Textnamen; Flaggen nur dekorativ (`alt=""`) |
-| iOS       | `.accessibilityLabel("Telefonnummer")`; Hinweis zur Ländervorwahl als `.accessibilityHint`                         |
-| Android   | TalkBack liest gruppierte Nummern blockweise; Länderauswahl mit Textnamen                                         |
+## Android
 
-Übergreifend:
-
-- Format-Hinweis (Beispielnummer) als Hilfetext, nicht nur als Platzhalter.
-- Fehlermeldung nennt Ursache und Lösung, z. B. „Telefonnummer unvollständig. Beispiel: +49 30 1234567“.
-- Vorlesen formatierter Nummern mit VoiceOver, TalkBack, NVDA und JAWS testen.
-
----
-
-## Quellen
-
-- [GOV.UK – Phone numbers](https://design-system.service.gov.uk/patterns/phone-numbers/)
-- [W3C – Input formats](https://www.w3.org/WAI/WCAG2/supplemental/patterns/o4p08-input-formats/)
-- [teltarif – Telefonnummern nach DIN 5008](https://www.teltarif.de/festnetz/telefonnummer-schreibweise.html)
+- **Feld**: `KeyboardOptions(keyboardType = KeyboardType.Phone)`; Autofill über `semantics { contentType = ContentType.PhoneNumber }`; Views `inputType="phone"` + `autofillHints="phone"`.
+- **Formatierung**: bei Fokusverlust mit `PhoneNumberUtils.formatNumber(number, countryIso)` oder libphonenumber. `PhoneNumberFormattingTextWatcher` (Views) formatiert live nach Geräteregion – nur für Formulare mit einem Land verwenden.
+- **Copy/Paste**: `InputTransformation` darf `tel:` entfernen; sonst alle Zeichen zulassen.
+- **Barrierefreiheit**: TalkBack liest gruppierte Nummern blockweise; Länderauswahl mit Textnamen.

@@ -55,13 +55,23 @@ Quellen und Standards: [input-formatting-quellen.md](./input-formatting-quellen.
 
 ## Design Systeme im Vergleich
 
-Stand: Suchauszüge, Originalseiten teils nicht abgerufen. Nicht untersucht: Polaris, Atlassian, Carbon, Material, Ant Design, Chakra.
+Stand: Suchauszüge, Originalseiten nicht abgerufen. Nicht untersucht: Ant Design, Chakra, Fluent, Spectrum.
+
+**Ohne eigene Vorgaben zu Telefonnummern gefunden** (Suche ohne Treffer, keine Aussage über den tatsächlichen Stand):
+
+- **Atlassian Design System**: keine offizielle Seite gefunden. Auf `atlassian.design` direkt prüfen.
+- **IBM Carbon**: keine Telefon-Komponente gefunden; nur ein Community-Request für ein Telefonfeld mit Ländervorwahl-Auswahl (Titel eines Issues, Inhalt und Status nicht geprüft).
+- **Material Design 3**: keine offizielle Vorgabe gefunden. Das Community-gepflegte Material-Web-Dokument nennt `type="tel"` (Telefontastatur) und `inputmode` für mehr Kontrolle ([Material Web Text field](https://github.com/material-components/material-web/blob/main/docs/components/text-field.md)).
 
 | Design System / Ansatz     | Eingabe und Formatierung                                                                                                                                         | Quelle                                                                                                                         |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | **GOV.UK**                 | `type="tel"`, `autocomplete="tel"`; alle Schreibweisen zulassen; keine Input-Maske; keine umformatierte Anzeige der Eingabe (z. B. ergänztes `+44`); Fehlermeldung mit Beispielformaten | [Phone numbers](https://design-system.service.gov.uk/patterns/telephone-numbers)                                               |
 | **ONS**                    | Übernimmt GOV.UK: Feld muss alle Varianten zulassen                                                                                                              | [ONS Service Manual](https://service-manual.ons.gov.uk/design-system/patterns/phone-numbers)                                   |
 | **Salesforce Lightning**   | Eingabe `lightning-input type="tel"`; Anzeige separat über `lightning-formatted-phone` (`tel:`-Link); Format nach Locale, bei `en-US`/`en-CA` `(999) 999-9999`; `+` davor verhindert das | [lightning-formatted-phone](https://developer.salesforce.com/docs/platform/lightning-component-reference/guide/lightning-formatted-phone) |
+| **Shopify Polaris**        | Eigene Komponente „Phone field“ mit Ländervorwahl-Formatierung; `type` nur `mobile` oder leer, keine zusätzliche Validierung nach Typ; `autocomplete="tel"` immer setzen (Best Practice des Text field) | [Phone field](https://shopify.dev/docs/api/checkout-ui-extensions/2025-10-rc/polaris-web-components/forms/phonefield), [Text field](https://polaris.shopify.com/components/text-field) |
+| **USWDS**                  | Empfiehlt Input-Maske `___-___-____` für US-Nummern plus Validierung auf Client und Server (steht im Widerspruch zu GOV.UK; eigene Tests der Input-Mask-Komponente zeigen Barrierefreiheits-Mängel, siehe Insights in `input-formatting-plattformen.md`) | [Phone number pattern](https://designsystem.digital.gov/patterns/create-a-user-profile/phone-number/) |
+| **Salt**                    | Eigenes Muster „International phone number input“; bei formatierten Eingaben Hilfetext mit Beispiel, Platzhalter nie als einzige Anleitung | [International phone number](https://saltdesignsystem.com/salt/patterns/international-phone-number-input), [Formatted input](https://www.saltdesignsystem.com/salt/patterns/formatted-input) |
+| **Porsche Design System**  | Eigene Komponente `input-tel`; nutzt die Browser-Validierung für das Telefonformat | [input-tel](https://designsystem.porsche.com/v3/components/input-tel/usage/) |
 | **Komponenten mit libphonenumber** (z. B. Michelin, Signicat, react-phone-number-input) | Parsen und Formatieren über libphonenumber; Ländervorwahl in eigener, suchbarer Auswahl; Gültigkeit je Land | [react-phone-number-input](https://cdn.jsdelivr.net/npm/react-phone-number-input@3.4.17/README.md), [Michelin](https://designsystem.michelin.com/components/phone-number), [Signicat](https://catnip.signicat.com/components/input-phone/guidelines.html) |
 
 **Einordnung**

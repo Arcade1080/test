@@ -11,6 +11,8 @@ Gliederung wie die Eingabetypen in [input-formatting-plattformen.md](./input-for
 - **Plattformübergreifend**: Grundlagen, Formatierungsregeln mit Beispielen, Verhalten bei Copy/Paste, Verhalten bei Sprachwechsel
 - **Web**, **iOS**, **Android**: Feldkonfiguration und Tastatur, Zeitpunkt und API der Formatierung, Copy/Paste, Barrierefreiheit
 
+Quellen und Standards: [input-formatting-quellen.md](./input-formatting-quellen.md#telefonnummern)
+
 ---
 
 ## Plattformübergreifend

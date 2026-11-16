@@ -33,7 +33,7 @@ Quellen und Standards: [input-formatting-quellen.md](./input-formatting-quellen.
 
 | Regel                                 | Beschreibung                                                                                                                                                                                                                                                              | Eingabe               | Anzeigewert                                                 | Datenwert       |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ----------------------------------------------------------- | --------------- |
-| Formatierung nach Fokusverlust        | Nicht live umformatieren, GOV.UK empfiehlt, alle Schreibweisen zu akzeptieren ([GOV.UK](https://design-system.service.gov.uk/patterns/phone-numbers/)). Bei Fokusverlust parsen (Standardregion = gewähltes Land oder Region der Nutzenden), formatieren, E.164 speichern | `0301234567`          | Im Fokus: `0301234567`<br/>nach Fokusverlust: `030 1234567` | `+49301234567`  |
+| Formatierung nach Fokusverlust        | Nicht live umformatieren; alle Schreibweisen akzeptieren ([GOV.UK](https://design-system.service.gov.uk/patterns/telephone-numbers)). Bei Fokusverlust parsen (Standardregion = gewähltes Land oder Region der Nutzenden), formatieren, E.164 speichern. **Abweichung von GOV.UK:** GOV.UK rät davon ab, Nutzenden eine umformatierte Version ihrer Eingabe zu zeigen. Alternative: Eingabe unverändert lassen und nur normalisiert speichern | `0301234567`          | Im Fokus: `0301234567`<br/>nach Fokusverlust: `030 1234567` | `+49301234567`  |
 | Nach Land der Nummer formatieren      | Format folgt dem Land der Nummer (libphonenumber bzw. Plattform-APIs), nicht der UI-Sprache                                                                                                                                                                               | `+41 44 668 18 00`    | `+41 44 668 18 00`                                          | `+41446681800`  |
 | Leerzeichen nach Vorwahl setzen       | DIN 5008: Leerzeichen nach Länder- und Ortsvorwahl, keine weiteren Gruppen im Teilnehmeranschluss ([teltarif](https://www.teltarif.de/festnetz/telefonnummer-schreibweise.html))                                                                                          | `0171/1234567`        | `0171 1234567`                                              | `+491711234567` |
 | `(0)` entfernen                       | Die `0` der Ortsvorwahl entfällt nach `+49`; `+49 (0)30 …` gilt als falsch                                                                                                                                                                                                | `+49 (0)30 123 45 67` | `+49 30 1234567`                                            | `+49301234567`  |
@@ -50,6 +50,27 @@ Quellen und Standards: [input-formatting-quellen.md](./input-formatting-quellen.
 
 - **Format folgt dem Land der Nummer**: Ein Sprachwechsel ändert die Formatierung nicht. `+49 30 1234567` bleibt in jeder Sprache gleich.
 - **Nur Texte wechseln**: Ländernamen in der Vorwahl-Auswahl, Label, Hinweis- und Fehlertexte werden übersetzt.
+
+---
+
+## Design Systeme im Vergleich
+
+Stand: Suchauszüge, Originalseiten teils nicht abgerufen. Nicht untersucht: Polaris, Atlassian, Carbon, Material, Ant Design, Chakra.
+
+| Design System / Ansatz     | Eingabe und Formatierung                                                                                                                                         | Quelle                                                                                                                         |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **GOV.UK**                 | `type="tel"`, `autocomplete="tel"`; alle Schreibweisen zulassen; keine Input-Maske; keine umformatierte Anzeige der Eingabe (z. B. ergänztes `+44`); Fehlermeldung mit Beispielformaten | [Phone numbers](https://design-system.service.gov.uk/patterns/telephone-numbers)                                               |
+| **ONS**                    | Übernimmt GOV.UK: Feld muss alle Varianten zulassen                                                                                                              | [ONS Service Manual](https://service-manual.ons.gov.uk/design-system/patterns/phone-numbers)                                   |
+| **Salesforce Lightning**   | Eingabe `lightning-input type="tel"`; Anzeige separat über `lightning-formatted-phone` (`tel:`-Link); Format nach Locale, bei `en-US`/`en-CA` `(999) 999-9999`; `+` davor verhindert das | [lightning-formatted-phone](https://developer.salesforce.com/docs/platform/lightning-component-reference/guide/lightning-formatted-phone) |
+| **Komponenten mit libphonenumber** (z. B. Michelin, Signicat, react-phone-number-input) | Parsen und Formatieren über libphonenumber; Ländervorwahl in eigener, suchbarer Auswahl; Gültigkeit je Land | [react-phone-number-input](https://cdn.jsdelivr.net/npm/react-phone-number-input@3.4.17/README.md), [Michelin](https://designsystem.michelin.com/components/phone-number), [Signicat](https://catnip.signicat.com/components/input-phone/guidelines.html) |
+
+**Einordnung**
+
+| Ansatz                                | Vorteil                                                   | Nachteil                                                            | Wann sinnvoll                                    |
+| ------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------ |
+| Eingabe unverändert, nur normalisiert | Keine Irritation, Nutzende sehen ihre Schreibweise        | Uneinheitliche Anzeige im Formular                                  | Freitextnahe Felder, Behörden-Services (GOV.UK) |
+| Formatierung bei Fokusverlust         | Zeigt, wie die Nummer verstanden wurde; einheitliche Anzeige | Kann Nutzende verwirren; setzt Länderwissen voraus (Standardregion) | Internationale Formulare mit Ländervorwahl-Auswahl |
+| Anzeige-Komponente getrennt vom Feld  | Format nur beim Lesen (Salesforce)                        | Zwei Komponenten                                                    | Detail- und Listenansichten                      |
 
 ---
 
